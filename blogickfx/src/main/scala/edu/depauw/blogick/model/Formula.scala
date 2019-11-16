@@ -89,7 +89,7 @@ object Formula {
 
     parse(s, formula(_)) match {
       case Success(value, _) => value
-      case f @ Failure(label, index, extra) => sys.error(f.trace().msg)
+      case f @ Failure(label, index, extra) => sys.error(f.trace().msg) // TODO improve this
     }
   }
 }
