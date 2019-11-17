@@ -86,3 +86,5 @@ final case class NegElim(neg: Proof, arg: Proof) extends Proof {
 final case class Use(binding: Binding) extends Proof {
   def formula: Formula = binding.formula
 }
+
+final case class ToDo(formula: Formula) extends Proof
