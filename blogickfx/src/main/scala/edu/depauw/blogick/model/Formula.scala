@@ -1,4 +1,5 @@
 package edu.depauw.blogick.model
+
 import fastparse.Parsed.Success
 import fastparse.Parsed.Failure
 
@@ -61,7 +62,16 @@ final case class Proposition(name: String) extends Formula {
 final case class Variable(id: Int) extends Formula {
   var ref: Option[Formula] = None
 
-  def unify(other: Formula): Unit = ref match {
+  override def equals(that: Any): Boolean =
+    ref match {
+      case Some(f) => f.equals(that)
+      case None => that match {
+        case that: Variable => this eq that
+        case _ => false
+      }
+    }
+
+    def unify(other: Formula): Unit = ref match {
     case Some(f) => f.unify(other)
     case None => ref = Some(other)
   }

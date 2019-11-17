@@ -16,11 +16,11 @@ class ProofSpec extends FlatSpec with Matchers {
 
   "A proof with a hole" should "have the correct formula" in {
     val A = Proposition("A")
-    val binding = Binding("x", A)
-    val proof = ImplIntro(
-      binding,
+    val binding = Binding("x", Implication(A, A))
+    val proof = ImplElim(
+      Use(binding),
       ToDo(Variable(0))
     )
-    proof.formula.toString should be ("A → _0") // TODO this is not a great test...
+    proof.formula should be (A)
   }
 }
