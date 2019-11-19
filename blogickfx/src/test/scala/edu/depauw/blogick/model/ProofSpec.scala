@@ -25,4 +25,12 @@ class ProofSpec extends FlatSpec with Matchers {
     proof.check(binding :: Nil)
     proof.formula should be (A)
   }
+
+  "An invalid proof" should "throw BindingException" in {
+    val A = Proposition("Magic")
+    val proof = Use(Binding("magic", A))
+    a [BindingException] should be thrownBy {
+      proof.check(Nil)
+    }
+  }
 }
