@@ -71,7 +71,7 @@ final case class Variable(id: Int) extends Formula {
       }
     }
 
-    def unify(other: Formula): Unit = ref match {
+  def unify(other: Formula): Unit = ref match {
     case Some(f) => f.unify(other)
     case None => ref = Some(other)
   }
@@ -113,6 +113,17 @@ final case object False extends Formula {
 }
 
 object Formula {
+  var varId = 0
+
+  def genVar(): Variable = {
+    varId += 1
+    Variable(varId)
+  }
+
+  def resetVars(): Unit = {
+    varId = 0
+  }
+
   def apply(s: String): Formula = {
     import fastparse._, SingleLineWhitespace._
 

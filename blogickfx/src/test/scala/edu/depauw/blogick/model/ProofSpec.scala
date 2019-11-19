@@ -11,6 +11,7 @@ class ProofSpec extends FlatSpec with Matchers {
       binding,
       Use(binding)
     )
+    proof.check(Nil)
     proof.formula should be (Implication(A, A))
   }
 
@@ -19,8 +20,9 @@ class ProofSpec extends FlatSpec with Matchers {
     val binding = Binding("x", Implication(A, A))
     val proof = ImplElim(
       Use(binding),
-      ToDo(Variable(0))
+      ToDo(Formula.genVar())
     )
+    proof.check(binding :: Nil)
     proof.formula should be (A)
   }
 }
