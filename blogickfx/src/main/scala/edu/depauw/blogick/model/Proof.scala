@@ -5,7 +5,7 @@ final case class Binding(name: String, formula: Formula)
 final case class BindingException(msg: String) extends Exception(msg)
 
 sealed trait Proof {
-  var formula: Formula = null
+  var formula: Formula = null // TODO ick...
 
   def check(env: List[Binding]): Unit
 }
