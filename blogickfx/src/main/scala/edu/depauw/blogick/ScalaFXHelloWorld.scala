@@ -14,13 +14,15 @@ import edu.depauw.blogick.model._
 import _root_.edu.depauw.blogick.gui.RenderProof
 
 object ScalaFXHelloWorld extends JFXApp {
-  val formula1 = Implication(Proposition("A"), Implication(Proposition("B"), Proposition("A")))
-  val formula2 = Implication(Proposition("A"), Conjunction(Proposition("A"), Proposition("A")))
   val A = Proposition("A")
-  val binding = Binding("x", A)
+  val B = Proposition("B")
+  val binding = Binding("x", Conjunction(A, B))
   val proof = ImplIntro(
     binding,
-    Use(binding)
+    ConjIntro(
+      ConjElimSecond(Use(binding)),
+      ConjElimFirst(Use(binding))
+    )
   )
   val cp = proof.check(Nil)
 
@@ -34,11 +36,6 @@ object ScalaFXHelloWorld extends JFXApp {
       // content = new HBox {
       //   padding = Insets(50, 80, 50, 80)
       //   children = Seq(
-      //     new Text {
-      //       text = formula2.toString
-      //       style = "-fx-font: normal bold 24pt sans-serif"
-      //       fill = Yellow
-      //     },
       //     new Text {
       //       text = "Scala"
       //       style = "-fx-font: normal bold 100pt sans-serif"

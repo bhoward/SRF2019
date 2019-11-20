@@ -1,30 +1,42 @@
 package edu.depauw.blogick.gui
 
 import edu.depauw.blogick.model._
+import scalafx.geometry.Insets
 import scalafx.scene.Node
 import scalafx.scene.control.TitledPane
 import scalafx.scene.layout.VBox
 import scalafx.scene.layout.HBox
+import scalafx.scene.paint._
 import scalafx.scene.text.Text
 
+
 object RenderProof {
+  def txt(s: String): Node = new Text(s) {
+    margin = Insets(10, 10, 10, 10)
+  }
+
   def apply(proof: CheckedProof): Node = proof match {
     case CkConjElimFirst(formula, conj) => new TitledPane {
       text = formula.toString
+      style = "-fx-background: #66f"
 
-      content = new VBox(new Text("first of"), RenderProof(conj))
+      content = new VBox(txt("first of"), RenderProof(conj))
     }
 
     case CkConjElimSecond(formula, conj) => new TitledPane {
       text = formula.toString
+      style = "-fx-background: #66f"
 
-      content = new VBox(new Text("second of"), RenderProof(conj))
+      content = new VBox(txt("second of"), RenderProof(conj))
     }
 
     case CkConjIntro(formula, first, second) => new TitledPane {
       text = formula.toString
+      style = "-fx-background: #22f"
 
-      content = new HBox(RenderProof(first), new Text("and"), RenderProof(second))
+      content = new HBox(RenderProof(first),
+      txt("and"),
+      RenderProof(second))
     }
 
     case CkDisjElim(formula, disj, leftBind, leftCase, rightBind, rightCase) => ???
@@ -39,8 +51,9 @@ object RenderProof {
 
     case CkImplIntro(formula, hypothesis, conclusion) => new TitledPane {
       text = formula.toString
+      style = "-fx-background: #2f2"
 
-      content = new VBox(new Text(s"assume ${hypothesis.name} : ${hypothesis.formula}"), RenderProof(conclusion))
+      content = new VBox(txt(s"assume ${hypothesis.name} : ${hypothesis.formula}"), RenderProof(conclusion))
     }
 
     case CkNegElim(formula, neg, arg) => ???
@@ -53,8 +66,9 @@ object RenderProof {
 
     case CkUse(formula, binding) => new TitledPane {
       text = formula.toString
+      style = "-fx-background: #ff2"
 
-      content = new Text(s"use ${binding.name} : ${binding.formula}")
+      content = txt(s"use ${binding.name} : ${binding.formula}")
     }
   }
 }
