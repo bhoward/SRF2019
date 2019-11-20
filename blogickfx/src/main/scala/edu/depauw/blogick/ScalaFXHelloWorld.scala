@@ -11,46 +11,56 @@ import scalafx.scene.paint._
 import scalafx.scene.text.Text
 
 import edu.depauw.blogick.model._
+import _root_.edu.depauw.blogick.gui.RenderProof
 
 object ScalaFXHelloWorld extends JFXApp {
   val formula1 = Implication(Proposition("A"), Implication(Proposition("B"), Proposition("A")))
   val formula2 = Implication(Proposition("A"), Conjunction(Proposition("A"), Proposition("A")))
+  val A = Proposition("A")
+  val binding = Binding("x", A)
+  val proof = ImplIntro(
+    binding,
+    Use(binding)
+  )
+  val cp = proof.check(Nil)
+
 
   stage = new PrimaryStage {
     //    initStyle(StageStyle.Unified)
     title = "ScalaFX Hello World"
     scene = new Scene {
-      fill = Color.rgb(38, 38, 38)
-      content = new HBox {
-        padding = Insets(50, 80, 50, 80)
-        children = Seq(
-          new Text {
-            text = formula2.toString
-            style = "-fx-font: normal bold 24pt sans-serif"
-            fill = Yellow
-          },
-          new Text {
-            text = "Scala"
-            style = "-fx-font: normal bold 100pt sans-serif"
-            fill = new LinearGradient(
-              endX = 0,
-              stops = Stops(Red, DarkRed))
-          },
-          new Text {
-            text = "FX"
-            style = "-fx-font: italic bold 100pt sans-serif"
-            fill = new LinearGradient(
-              endX = 0,
-              stops = Stops(White, DarkGray)
-            )
-            effect = new DropShadow {
-              color = DarkGray
-              radius = 15
-              spread = 0.25
-            }
-          }
-        )
-      }
+      content = RenderProof(cp)
+      // fill = Color.rgb(38, 38, 38)
+      // content = new HBox {
+      //   padding = Insets(50, 80, 50, 80)
+      //   children = Seq(
+      //     new Text {
+      //       text = formula2.toString
+      //       style = "-fx-font: normal bold 24pt sans-serif"
+      //       fill = Yellow
+      //     },
+      //     new Text {
+      //       text = "Scala"
+      //       style = "-fx-font: normal bold 100pt sans-serif"
+      //       fill = new LinearGradient(
+      //         endX = 0,
+      //         stops = Stops(Red, DarkRed))
+      //     },
+      //     new Text {
+      //       text = "FX"
+      //       style = "-fx-font: italic bold 100pt sans-serif"
+      //       fill = new LinearGradient(
+      //         endX = 0,
+      //         stops = Stops(White, DarkGray)
+      //       )
+      //       effect = new DropShadow {
+      //         color = DarkGray
+      //         radius = 15
+      //         spread = 0.25
+      //       }
+      //     }
+      //   )
+      // }
     }
 
   }
