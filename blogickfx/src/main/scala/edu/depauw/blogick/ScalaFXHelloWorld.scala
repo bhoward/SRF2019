@@ -17,21 +17,17 @@ object ScalaFXHelloWorld extends JFXApp {
   val A = Proposition("A")
   val B = Proposition("B")
   val C = Proposition("C")
-  val bindingH = Binding("H", Implication(Conjunction(A, B), C))
-  val bindingH1 = Binding("H1", A)
-  val bindingH2 = Binding("H2", B)
+  val bindingH1 = Binding("H1", Implication(Conjunction(A, B), C))
+  val bindingH2 = Binding("H2", Conjunction(B, A))
   val proof = ImplIntro(
-    bindingH,
+    bindingH1,
     ImplIntro(
-      bindingH1,
-      ImplIntro(
-        bindingH2,
-        ImplElim(
-          Use(bindingH),
-          ConjIntro(
-            Use(bindingH1),
-            Use(bindingH2)
-          )
+      bindingH2,
+      ImplElim(
+        Use(bindingH1),
+        ConjIntro(
+          ConjElimSecond(Use(bindingH2)),
+          ConjElimFirst(Use(bindingH2))
         )
       )
     )
@@ -41,7 +37,7 @@ object ScalaFXHelloWorld extends JFXApp {
 
   stage = new PrimaryStage {
     //    initStyle(StageStyle.Unified)
-    title = "ScalaFX Hello World"
+    title = "Block Logic"
     scene = new Scene {
       content = RenderProof(cp)
       // fill = Color.rgb(38, 38, 38)
