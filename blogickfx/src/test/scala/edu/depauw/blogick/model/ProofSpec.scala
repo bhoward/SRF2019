@@ -11,8 +11,8 @@ class ProofSpec extends FlatSpec with Matchers {
       binding,
       Use(binding)
     )
-    proof.check(Nil)
-    proof.formula should be (Implication(A, A))
+    val cp = proof.check(Nil)
+    cp.formula should be (Implication(A, A))
   }
 
   "A proof with a hole" should "have the correct formula" in {
@@ -22,14 +22,14 @@ class ProofSpec extends FlatSpec with Matchers {
       Use(binding),
       ToDo(Formula.genVar())
     )
-    proof.check(binding :: Nil)
-    proof.formula should be (A)
+    val cp = proof.check(binding :: Nil)
+    cp.formula should be (A)
   }
 
-  "An invalid proof" should "throw BindingException" in {
+  "An invalid proof" should "throw ProofCheckException" in {
     val A = Proposition("Magic")
     val proof = Use(Binding("magic", A))
-    a [BindingException] should be thrownBy {
+    a [ProofCheckException] should be thrownBy {
       proof.check(Nil)
     }
   }

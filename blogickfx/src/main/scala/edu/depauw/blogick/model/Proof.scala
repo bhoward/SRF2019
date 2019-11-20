@@ -2,125 +2,134 @@ package edu.depauw.blogick.model
 
 final case class Binding(name: String, formula: Formula)
 
-final case class BindingException(msg: String) extends Exception(msg)
+final case class ProofCheckException(msg: String) extends Exception(msg)
 
 sealed trait Proof {
-  var formula: Formula = null // TODO ick...
-
-  def check(env: List[Binding]): Unit
+  def check(env: List[Binding]): CheckedProof
 }
 
 final case class ImplIntro(hypothesis: Binding,  conclusion: Proof) extends Proof {
-  def check(env: List[Binding]): Unit = {
-    conclusion.check(hypothesis :: env)
-    formula = Implication(hypothesis.formula, conclusion.formula)
+  def check(env: List[Binding]): CheckedProof = {
+    val cc = conclusion.check(hypothesis :: env)
+    val formula = Implication(hypothesis.formula, cc.formula)
+    CkImplIntro(formula, hypothesis, cc)
   }
 }
 
 final case class ImplElim(impl: Proof, arg: Proof) extends Proof {
-  def check(env: List[Binding]): Unit = {
-    formula = Formula.genVar()
-    impl.check(env)
-    arg.check(env)
-    Implication(arg.formula, formula).unify(impl.formula)
+  def check(env: List[Binding]): CheckedProof = {
+    val formula = Formula.genVar()
+    val ci = impl.check(env)
+    val ca = arg.check(env)
+    Implication(ca.formula, formula).unify(ci.formula)
+    CkImplElim(formula, ci, ca)
   }
 }
 
 final case object TrueIntro extends Proof {
-  def check(env: List[Binding]): Unit = {
-    formula = True
+  def check(env: List[Binding]): CheckedProof = {
+    CkTrueIntro
   }
 }
 
 final case class ConjIntro(first: Proof, second: Proof) extends Proof {
-  def check(env: List[Binding]): Unit = {
-    first.check(env)
-    second.check(env)
-    formula = Conjunction(first.formula, second.formula)
+  def check(env: List[Binding]): CheckedProof = {
+    val cf = first.check(env)
+    val cs = second.check(env)
+    val formula = Conjunction(cf.formula, cs.formula)
+    CkConjIntro(formula, cf, cs)
   }
 }
 
 final case class ConjElimFirst(conj: Proof) extends Proof {
-  def check(env: List[Binding]): Unit = {
-    formula = Formula.genVar()
+  def check(env: List[Binding]): CheckedProof = {
+    val formula = Formula.genVar()
     val dummy = Formula.genVar()
-    conj.check(env)
-    Conjunction(formula, dummy).unify(conj.formula)
+    val cc = conj.check(env)
+    Conjunction(formula, dummy).unify(cc.formula)
+    CkConjElimFirst(formula, cc)
   }
 }
 
 final case class ConjElimSecond(conj: Proof) extends Proof {
-  def check(env: List[Binding]): Unit = {
-    formula = Formula.genVar()
+  def check(env: List[Binding]): CheckedProof = {
+    val formula = Formula.genVar()
     val dummy = Formula.genVar()
-    conj.check(env)
-    Conjunction(dummy, formula).unify(conj.formula)
+    val cc = conj.check(env)
+    Conjunction(dummy, formula).unify(cc.formula)
+    CkConjElimSecond(formula, cc)
   }
 }
 
 final case class DisjIntroLeft(arg: Proof) extends Proof {
-  def check(env: List[Binding]): Unit = {
-    arg.check(env)
-    formula = Disjunction(arg.formula, Formula.genVar())
+  def check(env: List[Binding]): CheckedProof = {
+    val ca = arg.check(env)
+    val formula = Disjunction(ca.formula, Formula.genVar())
+    CkDisjIntroLeft(formula, ca)
   }
 }
 
 final case class DisjIntroRight(arg: Proof) extends Proof {
-  def check(env: List[Binding]): Unit = {
-    arg.check(env)
-    formula = Disjunction(Formula.genVar(), arg.formula)
+  def check(env: List[Binding]): CheckedProof = {
+    val ca = arg.check(env)
+    val formula = Disjunction(Formula.genVar(), ca.formula)
+    CkDisjIntroRight(formula, ca)
   }
 }
 
 final case class DisjElim(disj: Proof, leftBind: Binding, leftCase: Proof, rightBind: Binding, rightCase: Proof) extends Proof {
-  def check(env: List[Binding]): Unit = {
-    formula = Formula.genVar()
-    disj.check(env)
-    leftCase.check(leftBind :: env)
-    rightCase.check(rightBind :: env)
-    Disjunction(leftBind.formula, rightBind.formula).unify(disj.formula)
-    formula.unify(leftCase.formula)
-    formula.unify(rightCase.formula)
+  def check(env: List[Binding]): CheckedProof = {
+    val formula = Formula.genVar()
+    val cd = disj.check(env)
+    val cl = leftCase.check(leftBind :: env)
+    val cr = rightCase.check(rightBind :: env)
+    Disjunction(leftBind.formula, rightBind.formula).unify(cd.formula)
+    formula.unify(cl.formula)
+    formula.unify(cr.formula)
+    CkDisjElim(formula, cd, leftBind, cl, rightBind, cr)
   }
 }
 
 final case class FalseElim(falsum: Proof) extends Proof {
-  def check(env: List[Binding]): Unit = {
-    formula = Formula.genVar()
-    falsum.check(env)
-    False.unify(falsum.formula)
+  def check(env: List[Binding]): CheckedProof = {
+    val formula = Formula.genVar()
+    val cf = falsum.check(env)
+    False.unify(cf.formula)
+    CkFalseElim(formula, cf)
   }
 }
 
 final case class NegIntro(hypothesis: Binding, contradiction: Proof) extends Proof {
-  def check(env: List[Binding]): Unit = {
-    formula = Negation(hypothesis.formula)
-    contradiction.check(hypothesis :: env)
-    False.unify(contradiction.formula)
+  def check(env: List[Binding]): CheckedProof = {
+    val formula = Negation(hypothesis.formula)
+    val cc = contradiction.check(hypothesis :: env)
+    False.unify(cc.formula)
+    CkNegIntro(formula, hypothesis, cc)
   }
 }
 
 final case class NegElim(neg: Proof, arg: Proof) extends Proof {
-  def check(env: List[Binding]): Unit = {
-    formula = Formula.genVar()
-    neg.check(env)
-    arg.check(env)
-    Negation(arg.formula).unify(neg.formula)
+  def check(env: List[Binding]): CheckedProof = {
+    val formula = Formula.genVar()
+    val cn = neg.check(env)
+    val ca = arg.check(env)
+    Negation(ca.formula).unify(cn.formula)
+    CkNegElim(formula, cn, ca)
   }
 }
 
 final case class Use(binding: Binding) extends Proof {
-  def check(env: List[Binding]): Unit = {
+  def check(env: List[Binding]): CheckedProof = {
     // TODO should this just take a name and look up the binding?
     if (!env.contains(binding)) {
-      throw BindingException(s"Binding not found: $binding")
+      throw ProofCheckException(s"Binding not found: $binding")
     }
-    formula = binding.formula
+    CkUse(binding.formula, binding)
   }
 }
 
-final case class ToDo(form: Formula) extends Proof {
-  def check(env: List[Binding]): Unit = {
-    formula = form
+final case class ToDo(formula: Formula) extends Proof {
+  def check(env: List[Binding]): CheckedProof = {
+    CkToDo(formula, env)
   }
 }
