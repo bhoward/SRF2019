@@ -32,7 +32,7 @@ object RenderProof {
 
     case CkConjIntro(formula, first, second) => new TitledPane {
       text = formula.toString
-      style = "-fx-background: #22f"
+      style = "-fx-background: hsb(240, 50%, 100%)"
 
       content = new HBox(RenderProof(first),
       txt("and"),
@@ -47,11 +47,16 @@ object RenderProof {
 
     case CkFalseElim(formula, falsum) => ???
 
-    case CkImplElim(formula, impl, arg) => ???
+    case CkImplElim(formula, impl, arg) => new TitledPane {
+      text = formula.toString
+      style = "-fx-background: hsb(120, 20%, 100%)"
+
+      content = new HBox(RenderProof(impl), txt("apply to"), RenderProof(arg))
+    }
 
     case CkImplIntro(formula, hypothesis, conclusion) => new TitledPane {
       text = formula.toString
-      style = "-fx-background: #2f2"
+      style = "-fx-background: hsb(120, 100%, 100%)"
 
       content = new VBox(txt(s"assume ${hypothesis.name} : ${hypothesis.formula}"), RenderProof(conclusion))
     }

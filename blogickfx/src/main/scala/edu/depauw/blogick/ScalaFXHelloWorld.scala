@@ -16,12 +16,24 @@ import _root_.edu.depauw.blogick.gui.RenderProof
 object ScalaFXHelloWorld extends JFXApp {
   val A = Proposition("A")
   val B = Proposition("B")
-  val binding = Binding("x", Conjunction(A, B))
+  val C = Proposition("C")
+  val bindingH = Binding("H", Implication(Conjunction(A, B), C))
+  val bindingH1 = Binding("H1", A)
+  val bindingH2 = Binding("H2", B)
   val proof = ImplIntro(
-    binding,
-    ConjIntro(
-      ConjElimSecond(Use(binding)),
-      ConjElimFirst(Use(binding))
+    bindingH,
+    ImplIntro(
+      bindingH1,
+      ImplIntro(
+        bindingH2,
+        ImplElim(
+          Use(bindingH),
+          ConjIntro(
+            Use(bindingH1),
+            Use(bindingH2)
+          )
+        )
+      )
     )
   )
   val cp = proof.check(Nil)
