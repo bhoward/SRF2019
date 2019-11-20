@@ -8,6 +8,8 @@ import scalafx.scene.layout.VBox
 import scalafx.scene.layout.HBox
 import scalafx.scene.paint._
 import scalafx.scene.text.Text
+import scalafx.scene.layout.Pane
+import scalafx.geometry.Pos
 
 
 object RenderProof {
@@ -15,24 +17,30 @@ object RenderProof {
     margin = Insets(10, 10, 10, 10)
   }
 
+  def boxtxt(s: String): Node = new HBox(new Text(s) { margin = Insets(2, 2, 2, 2) }) {
+    style = "-fx-background-color: white; -fx-border-color: black; -fx-border-radius: 2"
+  }
+
+  def txtRow(nodes: Node*): Node = new HBox(nodes : _*) { fillHeight = false; alignment = Pos.CenterLeft }
+
   def apply(proof: CheckedProof): Node = proof match {
     case CkConjElimFirst(formula, conj) => new TitledPane {
       text = formula.toString
-      style = "-fx-background: #66f"
+      style = "-fx-background: derive(dodgerblue, 50%)"
 
       content = new VBox(txt("first of"), RenderProof(conj))
     }
 
     case CkConjElimSecond(formula, conj) => new TitledPane {
       text = formula.toString
-      style = "-fx-background: #66f"
+      style = "-fx-background: derive(dodgerblue, 50%)"
 
       content = new VBox(txt("second of"), RenderProof(conj))
     }
 
     case CkConjIntro(formula, first, second) => new TitledPane {
       text = formula.toString
-      style = "-fx-background: hsb(240, 50%, 100%)"
+      style = "-fx-background: dodgerblue"
 
       content = new HBox(RenderProof(first),
       txt("and"),
@@ -49,16 +57,18 @@ object RenderProof {
 
     case CkImplElim(formula, impl, arg) => new TitledPane {
       text = formula.toString
-      style = "-fx-background: hsb(120, 20%, 100%)"
+      style = "-fx-background: derive(limegreen, 50%)"
 
       content = new HBox(RenderProof(impl), txt("apply to"), RenderProof(arg))
     }
 
     case CkImplIntro(formula, hypothesis, conclusion) => new TitledPane {
       text = formula.toString
-      style = "-fx-background: hsb(120, 100%, 100%)"
+      style = "-fx-background: limegreen"
 
-      content = new VBox(txt(s"assume ${hypothesis.name} : ${hypothesis.formula}"), RenderProof(conclusion))
+      content = new VBox(
+        txtRow(txt("assume"), boxtxt(s"${hypothesis.name} : ${hypothesis.formula}")),
+        RenderProof(conclusion))
     }
 
     case CkNegElim(formula, neg, arg) => ???
@@ -73,7 +83,7 @@ object RenderProof {
       text = formula.toString
       style = "-fx-background: #ff2"
 
-      content = txt(s"use ${binding.name} : ${binding.formula}")
+      content = txtRow(txt("use"), boxtxt(s"${binding.name} : ${binding.formula}"))
     }
   }
 }
