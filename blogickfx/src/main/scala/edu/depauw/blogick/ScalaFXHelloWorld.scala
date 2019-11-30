@@ -4,7 +4,7 @@ import scalafx.application.JFXApp
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.scene.Scene
 
-import edu.depauw.blogick.gui.RenderProof
+import edu.depauw.blogick.gui.ProofRenderer
 import edu.depauw.blogick.model._
 
 object ScalaFXHelloWorld extends JFXApp {
@@ -31,7 +31,7 @@ object ScalaFXHelloWorld extends JFXApp {
   stage = new PrimaryStage {
     title = "Block Logic"
     scene = new Scene {
-      content = RenderProof(cp)
+      content = ProofRenderer(cp)
     }
   }
 }

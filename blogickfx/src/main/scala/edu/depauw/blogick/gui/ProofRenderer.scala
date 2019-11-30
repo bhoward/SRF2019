@@ -15,10 +15,9 @@ import scalafx.scene.input.DataFormat
 import scalafx.scene.input.ClipboardContent
 import scalafx.scene.image.WritableImage
 import scalafx.scene.SnapshotResult
-import scalafx.scene.SnapshotParameters
 
 
-object RenderProof {
+object ProofRenderer {
   def txt(s: String): Node = new Text(s) {
     margin = Insets(10, 10, 10, 10)
   }
@@ -34,23 +33,23 @@ object RenderProof {
       text = formula.toString
       style = "-fx-background: derive(dodgerblue, 50%)"
 
-      content = new VBox(txt("first of"), RenderProof(conj))
+      content = new VBox(txt("first of"), ProofRenderer(conj))
     }
 
     case CkConjElimSecond(formula, conj) => new TitledPane {
       text = formula.toString
       style = "-fx-background: derive(dodgerblue, 50%)"
 
-      content = new VBox(txt("second of"), RenderProof(conj))
+      content = new VBox(txt("second of"), ProofRenderer(conj))
     }
 
     case CkConjIntro(formula, first, second) => new TitledPane {
       text = formula.toString
       style = "-fx-background: dodgerblue"
 
-      content = new HBox(RenderProof(first),
+      content = new HBox(ProofRenderer(first),
       txt("and"),
-      RenderProof(second))
+      ProofRenderer(second))
     }
 
     case CkDisjElim(formula, disj, leftBind, leftCase, rightBind, rightCase) => ???
@@ -65,7 +64,7 @@ object RenderProof {
       text = formula.toString
       style = "-fx-background: derive(limegreen, 50%)"
 
-      content = new HBox(RenderProof(impl), txt("apply to"), RenderProof(arg))
+      content = new HBox(ProofRenderer(impl), txt("apply to"), ProofRenderer(arg))
     }
 
     case CkImplIntro(formula, hypothesis, conclusion) => new TitledPane {
@@ -82,7 +81,7 @@ object RenderProof {
       }
 
       content = new VBox(txtRow(txt("assume"), hyp),
-        RenderProof(conclusion))
+        ProofRenderer(conclusion))
     }
 
     case CkNegElim(formula, neg, arg) => ???
