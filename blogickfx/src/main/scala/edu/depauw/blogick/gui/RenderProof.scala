@@ -10,6 +10,12 @@ import scalafx.scene.paint._
 import scalafx.scene.text.Text
 import scalafx.scene.layout.Pane
 import scalafx.geometry.Pos
+import scalafx.scene.input.TransferMode
+import scalafx.scene.input.DataFormat
+import scalafx.scene.input.ClipboardContent
+import scalafx.scene.image.WritableImage
+import scalafx.scene.SnapshotResult
+import scalafx.scene.SnapshotParameters
 
 
 object RenderProof {
@@ -66,8 +72,16 @@ object RenderProof {
       text = formula.toString
       style = "-fx-background: limegreen"
 
-      content = new VBox(
-        txtRow(txt("assume"), boxtxt(s"${hypothesis.name} : ${hypothesis.formula}")),
+      val hyp = boxtxt(s"${hypothesis.name} : ${hypothesis.formula}")
+      hyp.setOnDragDetected { e =>
+        val img = hyp.snapshot(new SnapshotParameters(), null)
+        val db = hyp.startDragAndDrop(TransferMode.Copy)
+        db.setContent(ClipboardContent(DataFormat.PlainText -> "Hello")) // TODO
+        db.setDragView(img)
+        e.consume()
+      }
+
+      content = new VBox(txtRow(txt("assume"), hyp),
         RenderProof(conclusion))
     }
 

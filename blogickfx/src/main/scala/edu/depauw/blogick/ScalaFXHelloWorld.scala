@@ -4,8 +4,8 @@ import scalafx.application.JFXApp
 import scalafx.application.JFXApp.PrimaryStage
 import scalafx.scene.Scene
 
-import edu.depauw.blogick.model._
 import edu.depauw.blogick.gui.RenderProof
+import edu.depauw.blogick.model._
 
 object ScalaFXHelloWorld extends JFXApp {
   val A = Proposition("A")
