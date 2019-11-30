@@ -74,10 +74,10 @@ object RenderProof {
 
       val hyp = boxtxt(s"${hypothesis.name} : ${hypothesis.formula}")
       hyp.setOnDragDetected { e =>
-        val img = hyp.snapshot(new SnapshotParameters(), null)
+        val img = hyp.snapshot(null, null)
         val db = hyp.startDragAndDrop(TransferMode.Copy)
         db.setContent(ClipboardContent(DataFormat.PlainText -> "Hello")) // TODO
-        db.setDragView(img)
+        db.setDragView(img, img.getWidth/2 - e.getX, e.getY - img.getHeight/2) // Why?!?
         e.consume()
       }
 
