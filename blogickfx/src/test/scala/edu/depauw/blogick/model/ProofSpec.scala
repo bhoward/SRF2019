@@ -20,7 +20,7 @@ class ProofSpec extends FlatSpec with Matchers {
     val binding = Binding("x", Implication(A, A))
     val proof = ImplElim(
       Use(binding),
-      ToDo(Formula.genVar())
+      ToDo
     )
     val cp = proof.check(binding :: Nil)
     cp.formula should be (A)

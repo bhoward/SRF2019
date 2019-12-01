@@ -21,7 +21,8 @@ object ScalaFXHelloWorld extends JFXApp {
         Use(bindingH1),
         ConjIntro(
           ConjElimSecond(Use(bindingH2)),
-          ConjElimFirst(Use(bindingH2))
+          // ConjElimFirst(Use(bindingH2))
+          ToDo
         )
       )
     )

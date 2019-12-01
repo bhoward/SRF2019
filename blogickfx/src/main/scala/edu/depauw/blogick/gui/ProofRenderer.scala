@@ -15,6 +15,8 @@ import scalafx.scene.input.DataFormat
 import scalafx.scene.input.ClipboardContent
 import scalafx.scene.image.WritableImage
 import scalafx.scene.SnapshotResult
+import scalafx.scene.control.ContextMenu
+import scalafx.scene.control.MenuItem
 
 
 object ProofRenderer {
@@ -26,7 +28,10 @@ object ProofRenderer {
     style = "-fx-background-color: white; -fx-border-color: black; -fx-border-radius: 2"
   }
 
-  def txtRow(nodes: Node*): Node = new HBox(nodes : _*) { fillHeight = false; alignment = Pos.CenterLeft }
+  def txtRow(nodes: Node*): Node = new HBox(nodes : _*) {
+    fillHeight = false
+    alignment = Pos.CenterLeft
+  }
 
   def apply(proof: CheckedProof): Node = proof match {
     case CkConjElimFirst(formula, conj) => new TitledPane {
@@ -88,9 +93,28 @@ object ProofRenderer {
 
     case CkNegIntro(formula, hypothesis, contradiction) => ???
 
-    case CkToDo(formula, env) => ???
+    case CkToDo(formula, env) => new TitledPane {
+      text = formula.toString
+      style = "-fx-background: red"
 
-    case CkTrueIntro => ???
+      // TODO populate this properly
+      contextMenu = new ContextMenu(
+        new MenuItem("Use ..."),
+        new MenuItem("Elim ..."),
+        new MenuItem("Intro ...")
+      )
+
+      // TODO make this bigger? allow dropping hypotheses here?
+      // make this a workspace where subproofs can be built using env?
+      content = new Pane {
+        prefHeight = 100
+        prefWidth = 100
+      }
+    }
+
+    case CkTrueIntro => new TitledPane {
+      text = True.toString
+    }
 
     case CkUse(formula, binding) => new TitledPane {
       text = formula.toString

@@ -128,8 +128,8 @@ final case class Use(binding: Binding) extends Proof {
   }
 }
 
-final case class ToDo(formula: Formula) extends Proof {
+final case object ToDo extends Proof {
   def check(env: List[Binding]): CheckedProof = {
-    CkToDo(formula, env)
+    CkToDo(Formula.genVar(), env)
   }
 }
