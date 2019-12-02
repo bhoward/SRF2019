@@ -2,6 +2,12 @@ package edu.depauw.blogick.model
 
 import cats.data.State
 
+// TODO parse from/render to text
+// add top-level Theorem (maybe in CheckedProof?) -- give it a name and a formula (names for props);
+//   allow use in other proofs (props as params);
+//   keep track of completed theorems (no ToDo) and dependencies (no cycles);
+//   allow update of ToDo with replacement proof
+
 final case class ProofCheckException(msg: String) extends Exception(msg)
 
 sealed trait Proof {
