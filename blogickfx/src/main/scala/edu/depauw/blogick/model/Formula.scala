@@ -66,7 +66,7 @@ final case class Variable(id: Int) extends Formula {
     ref match {
       case Some(f) => f.equals(that)
       case None => that match {
-        case that: Variable => this eq that
+        case v: Variable => this.id == v.id
         case _ => false
       }
     }
@@ -113,17 +113,6 @@ final case object False extends Formula {
 }
 
 object Formula {
-  var varId = 0
-
-  def genVar(): Variable = {
-    varId += 1
-    Variable(varId)
-  }
-
-  def resetVars(): Unit = {
-    varId = 0
-  }
-
   def apply(s: String): Formula = {
     import fastparse._, SingleLineWhitespace._
 

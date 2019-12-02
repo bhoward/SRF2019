@@ -8,26 +8,22 @@ import edu.depauw.blogick.gui.ProofRenderer
 import edu.depauw.blogick.model._
 
 object ScalaFXHelloWorld extends JFXApp {
-  val A = Proposition("A")
-  val B = Proposition("B")
-  val C = Proposition("C")
-  val bindingH1 = Binding("H1", Implication(Conjunction(A, B), C))
-  val bindingH2 = Binding("H2", Conjunction(B, A))
   val proof = ImplIntro(
-    bindingH1,
+    "H1",
     ImplIntro(
-      bindingH2,
+      "H2",
       ImplElim(
-        Use(bindingH1),
+        Use("H1"),
         ConjIntro(
-          ConjElimSecond(Use(bindingH2)),
-          // ConjElimFirst(Use(bindingH2))
-          ToDo
+          ConjElimSecond(Use("H2")),
+          ConjElimFirst(Use("H2"))
+          // ToDo
         )
       )
     )
   )
-  val cp = proof.check(Nil)
+
+  val cp = proof.check.runA(Environment.Empty).value
 
   stage = new PrimaryStage {
     title = "Block Logic"

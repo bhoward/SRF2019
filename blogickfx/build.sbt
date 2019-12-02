@@ -9,6 +9,7 @@ scalaVersion := "2.13.0"
 libraryDependencies ++= Seq(
   "org.scalafx"   %% "scalafx"   % "12.0.2-R18",
   "com.lihaoyi"   %% "fastparse" % "2.1.3",
+  "org.typelevel" %% "cats-core" % "2.0.0",
   "org.scalatest" %% "scalatest" % "3.0.8" % "test" //http://www.scalatest.org/download
 )
 
