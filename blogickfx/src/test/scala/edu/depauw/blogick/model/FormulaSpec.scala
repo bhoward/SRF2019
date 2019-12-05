@@ -3,7 +3,7 @@ package edu.depauw.blogick.model
 import org.scalatest._
 
 class FormulaSpec extends FlatSpec with Matchers {
-  val formula = Formula("A -> B")
+  val formula = Formula.fromString("A -> B")
 
   "A simple formula" should "parse correctly" in {
     formula should be (Implication(Proposition("A"), Proposition("B")))
@@ -21,7 +21,7 @@ class FormulaSpec extends FlatSpec with Matchers {
   }
 
   it should "throw UnificationException if it doesn't match another formula" in {
-    val formula2 = Formula("B -> A")
+    val formula2 = Formula.fromString("B -> A")
     a [UnificationException] should be thrownBy {
       formula.unify(formula2)
     }

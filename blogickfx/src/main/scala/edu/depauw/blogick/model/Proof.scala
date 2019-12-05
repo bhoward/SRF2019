@@ -12,6 +12,16 @@ final case class ProofCheckException(msg: String) extends Exception(msg)
 
 sealed trait Proof {
   val check: State[Environment, CheckedProof]
+
+  def render(precedence: Int): String
+  override def toString: String = render(0)
+
+  def parenIf(level: Int, precedence: Int)(s: String): String =
+  if (precedence >= level) {
+    "(" + s + ")"
+  } else {
+    s
+  }
 }
 
 final case class ImplIntro(hypothesis: String,  conclusion: Proof) extends Proof {
@@ -22,6 +32,8 @@ final case class ImplIntro(hypothesis: String,  conclusion: Proof) extends Proof
     formula = Implication(hypForm, cc.formula)
     binding <- Environment.retract
   } yield CkImplIntro(formula, binding, cc)
+
+  def render(precedence: Int): String = parenIf(1, precedence)(s"$hypothesis ⟹ ${conclusion.render(0)}")
 }
 
 final case class ImplElim(impl: Proof, arg: Proof) extends Proof {
@@ -31,12 +43,16 @@ final case class ImplElim(impl: Proof, arg: Proof) extends Proof {
     ca <- arg.check
     _ = Implication(ca.formula, formula).unify(ci.formula)
   } yield CkImplElim(formula, ci, ca)
+
+  def render(precedence: Int): String = parenIf(2, precedence)(s"${impl.render(1)} ${arg.render(2)}")
 }
 
 final case object TrueIntro extends Proof {
   val check: State[Environment, CheckedProof] = State { env =>
     (env, CkTrueIntro)
   }
+
+  def render(precedence: Int): String = "◇"
 }
 
 final case class ConjIntro(first: Proof, second: Proof) extends Proof {
@@ -45,6 +61,8 @@ final case class ConjIntro(first: Proof, second: Proof) extends Proof {
     cs <- second.check
     formula = Conjunction(cf.formula, cs.formula)
   } yield CkConjIntro(formula, cf, cs)
+
+  def render(precedence: Int): String = s"⟨${first.render(0)}, ${second.render(0)}⟩"
 }
 
 final case class ConjElimFirst(conj: Proof) extends Proof {
@@ -54,6 +72,8 @@ final case class ConjElimFirst(conj: Proof) extends Proof {
     cc <- conj.check
     _ = Conjunction(formula, dummy).unify(cc.formula)
   } yield CkConjElimFirst(formula, cc)
+
+  def render(precedence: Int): String = parenIf(2, precedence)(s"π₀ ${conj.render(2)}")
 }
 
 final case class ConjElimSecond(conj: Proof) extends Proof {
@@ -63,6 +83,8 @@ final case class ConjElimSecond(conj: Proof) extends Proof {
     cc <- conj.check
     _ = Conjunction(dummy, formula).unify(cc.formula)
   } yield CkConjElimSecond(formula, cc)
+
+  def render(precedence: Int): String = parenIf(2, precedence)(s"π₁ ${conj.render(2)}")
 }
 
 final case class DisjIntroLeft(arg: Proof) extends Proof {
@@ -71,6 +93,8 @@ final case class DisjIntroLeft(arg: Proof) extends Proof {
     ca <- arg.check
     formula = Disjunction(ca.formula, other)
   } yield CkDisjIntroLeft(formula, ca)
+
+  def render(precedence: Int): String = parenIf(2, precedence)(s"ι₀ ${arg.render(2)}")
 }
 
 final case class DisjIntroRight(arg: Proof) extends Proof {
@@ -79,6 +103,8 @@ final case class DisjIntroRight(arg: Proof) extends Proof {
     ca <- arg.check
     formula = Disjunction(other, ca.formula)
   } yield CkDisjIntroRight(formula, ca)
+
+  def render(precedence: Int): String = parenIf(2, precedence)(s"ι₁ ${arg.render(2)}")
 }
 
 final case class DisjElim(disj: Proof, leftName: String, leftCase: Proof, rightName: String, rightCase: Proof) extends Proof {
@@ -97,6 +123,8 @@ final case class DisjElim(disj: Proof, leftName: String, leftCase: Proof, rightN
     _ = formula.unify(cl.formula)
     _ = formula.unify(cr.formula)
   } yield CkDisjElim(formula, cd, leftBind, cl, rightBind, cr)
+
+  def render(precedence: Int): String = ???
 }
 
 final case class FalseElim(falsum: Proof) extends Proof {
@@ -105,6 +133,8 @@ final case class FalseElim(falsum: Proof) extends Proof {
     cf <- falsum.check
     _ = False.unify(cf.formula)
   } yield CkFalseElim(formula, cf)
+
+  def render(precedence: Int): String = ???
 }
 
 final case class NegIntro(hypothesis: String, contradiction: Proof) extends Proof {
@@ -116,6 +146,8 @@ final case class NegIntro(hypothesis: String, contradiction: Proof) extends Proo
     binding <- Environment.retract
     _ = False.unify(cc.formula)
   } yield CkNegIntro(formula, binding, cc)
+
+  def render(precedence: Int): String = ???
 }
 
 final case class NegElim(neg: Proof, arg: Proof) extends Proof {
@@ -125,6 +157,8 @@ final case class NegElim(neg: Proof, arg: Proof) extends Proof {
     ca <- arg.check
     _ = Negation(ca.formula).unify(cn.formula)
   } yield CkNegElim(formula, cn, ca)
+
+  def render(precedence: Int): String = ???
 }
 
 final case class Use(name: String) extends Proof {
@@ -134,6 +168,8 @@ final case class Use(name: String) extends Proof {
       case Some(formula) => (env, CkUse(formula, Binding(name, formula)))
     }
   }
+
+  def render(precedence: Int): String = name
 }
 
 final case object ToDo extends Proof {
@@ -141,4 +177,18 @@ final case object ToDo extends Proof {
     val (env2, formula) = env.genVar()
     (env2, CkToDo(formula, env.bindings))
   }
+
+  def render(precedence: Int): String = "?"
+}
+
+object Proof {
+  import fastparse._
+  import fastparse.SingleLineWhitespace._
+  import fastparse.Parsed.Success
+  import fastparse.Parsed.Failure
+    
+  private def idStart(c: Char): Boolean = c.isUnicodeIdentifierStart
+  private def idPart(c: Char): Boolean = c.isUnicodeIdentifierPart || (c == '\'')
+
+
 }

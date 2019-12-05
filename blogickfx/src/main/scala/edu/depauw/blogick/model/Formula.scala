@@ -1,8 +1,5 @@
 package edu.depauw.blogick.model
 
-import fastparse.Parsed.Success
-import fastparse.Parsed.Failure
-
 final case class UnificationException(msg: String) extends Exception(msg)
 
 sealed trait Formula {
@@ -71,6 +68,8 @@ final case class Variable(id: Int) extends Formula {
       }
     }
 
+  // TODO also override hashCode, ...?
+
   def unify(other: Formula): Unit = ref match {
     case Some(f) => f.unify(other)
     case None => ref = Some(other)
@@ -113,57 +112,60 @@ final case object False extends Formula {
 }
 
 object Formula {
-  def apply(s: String): Formula = {
-    import fastparse._, SingleLineWhitespace._
+  import fastparse._
+  import fastparse.SingleLineWhitespace._
+  import fastparse.Parsed.Success
+  import fastparse.Parsed.Failure
+    
+  private def idStart(c: Char): Boolean = c.isUnicodeIdentifierStart
+  private def idPart(c: Char): Boolean = c.isUnicodeIdentifierPart || (c == '\'')
 
-    def idStart(c: Char): Boolean = c.isUnicodeIdentifierStart
-    def idPart(c: Char): Boolean = c.isUnicodeIdentifierPart || (c == '\'')
+  private def bottom[_: P]: P[Formula] = P(
+    ("False" | "⊥").!.map(_ => False)
+  )
 
-    def bottom[_: P]: P[Formula] = P(
-      ("False" | "⊥").!.map(_ => False)
-    )
+  private def top[_: P]: P[Formula] = P(
+    ("True" | "⊤").!.map(_ => True)
+  )
 
-    def top[_: P]: P[Formula] = P(
-      ("True" | "⊤").!.map(_ => True)
-    )
+  private def prop[_: P]: P[Formula] = P(
+    (CharPred(idStart)~~CharsWhile(idPart).?).!.map(Proposition(_))
+  )
 
-   def prop[_: P]: P[Formula] = P(
-      (CharPred(idStart)~~CharsWhile(idPart).?).!.map(Proposition(_))
-    )
+  private def parens[_: P]: P[Formula] = P(
+    "(" ~/ parser ~ ")"
+  )
 
-    def parens[_: P]: P[Formula] = P(
-      "(" ~/ disj ~ ")"
-    )
+  private def negFactor[_: P]: P[Formula] = P(
+    (("~" | "¬") ~/ factor).map(Negation(_))
+  )
 
-    def negFactor[_: P]: P[Formula] = P(
-      (("~" | "¬") ~/ factor).map(Negation(_))
-    )
+  private def factor[_: P]: P[Formula] = P(
+    parens | negFactor | bottom | top | prop 
+  )
 
-    def factor[_: P]: P[Formula] = P(
-      parens | negFactor | bottom | top | prop 
-    )
+  private def impl[_: P]: P[Formula] = P(
+    (factor ~ (("->" | "→") ~/ factor).rep).map {
+      case (f, fs) => (f +: fs).reduceRight(Implication(_, _))
+    }
+  )
 
-    def impl[_: P]: P[Formula] = P(
-      (factor ~ (("->" | "→") ~/ factor).rep).map {
-        case (f, fs) => (f +: fs).reduceRight(Implication(_, _))
-      }
-    )
+  private def conj[_: P]: P[Formula] = P(
+    (impl ~ (("&" | "/\\" | "∧") ~/ impl).rep).map {
+      case (f, fs) => (f +: fs).reduceLeft(Conjunction(_, _))
+    }
+  )
 
-    def conj[_: P]: P[Formula] = P(
-      (impl ~ (("&" | "/\\" | "∧") ~/ impl).rep).map {
-        case (f, fs) => (f +: fs).reduceLeft(Conjunction(_, _))
-      }
-    )
+  def parser[_: P]: P[Formula] = P(
+    (conj ~ (("|" | "\\/" | "∨") ~/ conj).rep).map {
+      case (f, fs) => (f +: fs).reduceLeft(Disjunction(_, _))
+    }
+  )
 
-    def disj[_: P]: P[Formula] = P(
-      (conj ~ (("|" | "\\/" | "∨") ~/ conj).rep).map {
-        case (f, fs) => (f +: fs).reduceLeft(Disjunction(_, _))
-      }
-    )
+  def fromString(s: String): Formula = {
+    def topLevel[_: P]: P[Formula] = P(parser ~ End)
 
-    def formula[_: P]: P[Formula] = P(disj ~ End)
-
-    parse(s, formula(_)) match {
+    parse(s, topLevel(_)) match {
       case Success(value, _) => value
       case f @ Failure(label, index, extra) => sys.error(f.trace().msg) // TODO improve this
     }
