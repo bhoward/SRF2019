@@ -33,7 +33,7 @@ final case class ImplIntro(hypothesis: String,  conclusion: Proof) extends Proof
     binding <- Environment.retract
   } yield CkImplIntro(formula, binding, cc)
 
-  def render(precedence: Int): String = parenIf(1, precedence)(s"$hypothesis ⟹ ${conclusion.render(0)}")
+  def render(precedence: Int): String = parenIf(1, precedence)(s"assume $hypothesis: ${conclusion.render(0)}")
 }
 
 final case class ImplElim(impl: Proof, arg: Proof) extends Proof {
@@ -52,7 +52,7 @@ final case object TrueIntro extends Proof {
     (env, CkTrueIntro)
   }
 
-  def render(precedence: Int): String = "◇"
+  def render(precedence: Int): String = "<>"
 }
 
 final case class ConjIntro(first: Proof, second: Proof) extends Proof {
@@ -62,7 +62,7 @@ final case class ConjIntro(first: Proof, second: Proof) extends Proof {
     formula = Conjunction(cf.formula, cs.formula)
   } yield CkConjIntro(formula, cf, cs)
 
-  def render(precedence: Int): String = s"⟨${first.render(0)}, ${second.render(0)}⟩"
+  def render(precedence: Int): String = s"<${first.render(0)}, ${second.render(0)}>"
 }
 
 final case class ConjElimFirst(conj: Proof) extends Proof {
@@ -73,7 +73,7 @@ final case class ConjElimFirst(conj: Proof) extends Proof {
     _ = Conjunction(formula, dummy).unify(cc.formula)
   } yield CkConjElimFirst(formula, cc)
 
-  def render(precedence: Int): String = parenIf(2, precedence)(s"π₀ ${conj.render(2)}")
+  def render(precedence: Int): String = parenIf(2, precedence)(s"first ${conj.render(2)}")
 }
 
 final case class ConjElimSecond(conj: Proof) extends Proof {
@@ -84,7 +84,7 @@ final case class ConjElimSecond(conj: Proof) extends Proof {
     _ = Conjunction(dummy, formula).unify(cc.formula)
   } yield CkConjElimSecond(formula, cc)
 
-  def render(precedence: Int): String = parenIf(2, precedence)(s"π₁ ${conj.render(2)}")
+  def render(precedence: Int): String = parenIf(2, precedence)(s"second ${conj.render(2)}")
 }
 
 final case class DisjIntroLeft(arg: Proof) extends Proof {
@@ -94,7 +94,7 @@ final case class DisjIntroLeft(arg: Proof) extends Proof {
     formula = Disjunction(ca.formula, other)
   } yield CkDisjIntroLeft(formula, ca)
 
-  def render(precedence: Int): String = parenIf(2, precedence)(s"ι₀ ${arg.render(2)}")
+  def render(precedence: Int): String = parenIf(2, precedence)(s"left ${arg.render(2)}")
 }
 
 final case class DisjIntroRight(arg: Proof) extends Proof {
@@ -104,7 +104,7 @@ final case class DisjIntroRight(arg: Proof) extends Proof {
     formula = Disjunction(other, ca.formula)
   } yield CkDisjIntroRight(formula, ca)
 
-  def render(precedence: Int): String = parenIf(2, precedence)(s"ι₁ ${arg.render(2)}")
+  def render(precedence: Int): String = parenIf(2, precedence)(s"right ${arg.render(2)}")
 }
 
 final case class DisjElim(disj: Proof, leftName: String, leftCase: Proof, rightName: String, rightCase: Proof) extends Proof {
@@ -124,7 +124,7 @@ final case class DisjElim(disj: Proof, leftName: String, leftCase: Proof, rightN
     _ = formula.unify(cr.formula)
   } yield CkDisjElim(formula, cd, leftBind, cl, rightBind, cr)
 
-  def render(precedence: Int): String = ???
+  def render(precedence: Int): String = parenIf(2, precedence)(s"[left $leftName: ${leftCase.render(0)}, right $rightName: ${rightCase.render(0)}] ${disj.render(2)}")
 }
 
 final case class FalseElim(falsum: Proof) extends Proof {
@@ -134,7 +134,7 @@ final case class FalseElim(falsum: Proof) extends Proof {
     _ = False.unify(cf.formula)
   } yield CkFalseElim(formula, cf)
 
-  def render(precedence: Int): String = ???
+  def render(precedence: Int): String = parenIf(2, precedence)(s"[] ${falsum.render(2)}")
 }
 
 final case class NegIntro(hypothesis: String, contradiction: Proof) extends Proof {
@@ -147,7 +147,7 @@ final case class NegIntro(hypothesis: String, contradiction: Proof) extends Proo
     _ = False.unify(cc.formula)
   } yield CkNegIntro(formula, binding, cc)
 
-  def render(precedence: Int): String = ???
+  def render(precedence: Int): String = ??? // TODO just make Negation(x) == Implication(x, False)?
 }
 
 final case class NegElim(neg: Proof, arg: Proof) extends Proof {
