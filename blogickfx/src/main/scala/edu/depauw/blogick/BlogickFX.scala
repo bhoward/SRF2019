@@ -7,7 +7,7 @@ import scalafx.scene.Scene
 import edu.depauw.blogick.gui.ProofRenderer
 import edu.depauw.blogick.model._
 
-object ScalaFXHelloWorld extends JFXApp {
+object BlogickFX extends JFXApp {
   val proof = ImplIntro(
     "H1",
     ImplIntro(

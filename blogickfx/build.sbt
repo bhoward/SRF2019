@@ -32,6 +32,6 @@ fork := true
 
 // set the main class for the main 'run' task
 // change Compile to Test to set it for 'test:run'
-mainClass in (Compile, run) := Some("edu.depauw.blogick.ScalaFXHelloWorld")
+mainClass in (Compile, run) := Some("edu.depauw.blogick.BlogickFX")
 
 shellPrompt := { _ => System.getProperty("user.name") + "> " }
