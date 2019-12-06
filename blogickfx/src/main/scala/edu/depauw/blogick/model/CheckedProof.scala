@@ -28,10 +28,6 @@ final case class CkDisjElim(formula: Formula, disj: CheckedProof,
 
 final case class CkFalseElim(formula: Formula, falsum: CheckedProof) extends CheckedProof
 
-final case class CkNegIntro(formula: Formula, hypothesis: Binding, contradiction: CheckedProof) extends CheckedProof
-
-final case class CkNegElim(formula: Formula, neg: CheckedProof, arg: CheckedProof) extends CheckedProof
-
 final case class CkUse(formula: Formula, binding: Binding) extends CheckedProof
 
 final case class CkToDo(formula: Formula, env: List[Binding]) extends CheckedProof

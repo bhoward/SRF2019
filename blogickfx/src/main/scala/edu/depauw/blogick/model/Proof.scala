@@ -2,7 +2,7 @@ package edu.depauw.blogick.model
 
 import cats.data.State
 
-// TODO parse from/render to text
+// TODO parse from text
 // add top-level Theorem (maybe in CheckedProof?) -- give it a name and a formula (names for props);
 //   allow use in other proofs (props as params);
 //   keep track of completed theorems (no ToDo) and dependencies (no cycles);
@@ -33,7 +33,7 @@ final case class ImplIntro(hypothesis: String,  conclusion: Proof) extends Proof
     binding <- Environment.retract
   } yield CkImplIntro(formula, binding, cc)
 
-  def render(precedence: Int): String = parenIf(1, precedence)(s"assume $hypothesis: ${conclusion.render(0)}")
+  def render(precedence: Int): String = parenIf(1, precedence)(s"$hypothesis ⇒ ${conclusion.render(0)}")
 }
 
 final case class ImplElim(impl: Proof, arg: Proof) extends Proof {
@@ -124,7 +124,7 @@ final case class DisjElim(disj: Proof, leftName: String, leftCase: Proof, rightN
     _ = formula.unify(cr.formula)
   } yield CkDisjElim(formula, cd, leftBind, cl, rightBind, cr)
 
-  def render(precedence: Int): String = parenIf(2, precedence)(s"[left $leftName: ${leftCase.render(0)}, right $rightName: ${rightCase.render(0)}] ${disj.render(2)}")
+  def render(precedence: Int): String = parenIf(2, precedence)(s"[left $leftName ⇒ ${leftCase.render(0)}, right $rightName ⇒ ${rightCase.render(0)}] ${disj.render(2)}")
 }
 
 final case class FalseElim(falsum: Proof) extends Proof {
@@ -135,30 +135,6 @@ final case class FalseElim(falsum: Proof) extends Proof {
   } yield CkFalseElim(formula, cf)
 
   def render(precedence: Int): String = parenIf(2, precedence)(s"[] ${falsum.render(2)}")
-}
-
-final case class NegIntro(hypothesis: String, contradiction: Proof) extends Proof {
-  val check: State[Environment, CheckedProof] = for {
-    hypForm <- Environment.genVar
-    formula = Negation(hypForm)
-    _ <- Environment.extend(hypothesis, hypForm)
-    cc <- contradiction.check
-    binding <- Environment.retract
-    _ = False.unify(cc.formula)
-  } yield CkNegIntro(formula, binding, cc)
-
-  def render(precedence: Int): String = ??? // TODO just make Negation(x) == Implication(x, False)?
-}
-
-final case class NegElim(neg: Proof, arg: Proof) extends Proof {
-  val check: State[Environment, CheckedProof] = for {
-    formula <- Environment.genVar
-    cn <- neg.check
-    ca <- arg.check
-    _ = Negation(ca.formula).unify(cn.formula)
-  } yield CkNegElim(formula, cn, ca)
-
-  def render(precedence: Int): String = ???
 }
 
 final case class Use(name: String) extends Proof {

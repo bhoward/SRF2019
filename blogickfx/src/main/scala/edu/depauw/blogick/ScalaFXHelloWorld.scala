@@ -26,7 +26,7 @@ object ScalaFXHelloWorld extends JFXApp {
   val cp = proof.check.runA(Environment.Empty).value
 
   stage = new PrimaryStage {
-    title = "Block Logic"
+    title = s"Block Logic: $proof"
     scene = new Scene {
       content = ProofRenderer(cp)
     }

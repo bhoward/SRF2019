@@ -89,10 +89,6 @@ object ProofRenderer {
         ProofRenderer(conclusion))
     }
 
-    case CkNegElim(formula, neg, arg) => ???
-
-    case CkNegIntro(formula, hypothesis, contradiction) => ???
-
     case CkToDo(formula, env) => new TitledPane {
       text = formula.toString
       style = "-fx-background: red"

@@ -4,6 +4,7 @@ import org.scalatest._
 
 class FormulaSpec extends FlatSpec with Matchers {
   val formula = Formula.fromString("A -> B")
+  val formula2 = Formula.fromString("A \\/ ~ A")
 
   "A simple formula" should "parse correctly" in {
     formula should be (Implication(Proposition("A"), Proposition("B")))
@@ -27,4 +28,12 @@ class FormulaSpec extends FlatSpec with Matchers {
     }
   }
   
+  "Another simple formula" should "parse correctly" in {
+    formula2 should be (Disjunction(Proposition("A"), Implication(Proposition("A"), False)))
+  }
+
+  it should "render correctly" in {
+    formula2.toString should be ("A ∨ ¬A")
+  }
+
 }
