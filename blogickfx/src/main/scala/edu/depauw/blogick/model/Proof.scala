@@ -166,5 +166,25 @@ object Proof {
   private def idStart(c: Char): Boolean = c.isUnicodeIdentifierStart
   private def idPart(c: Char): Boolean = c.isUnicodeIdentifierPart || (c == '\'')
 
+  private def id[_: P]: P[String] = P(
+    (CharPred(idStart)~~CharsWhile(idPart).?).!
+  )
 
+  private def prim[_: P]: P[Proof] = P(
+    id.map(Use(_))
+  | "?".!.map(_ => ToDo)
+  | "(" ~/ parser ~ ")"
+  | "<" ~/ (">".!.map(_ => TrueIntro) | (parser ~ "," ~ parser ~ ">").map {
+      case (first, second) => ConjIntro(first, second)
+    })
+  )
+
+  private def appl[_: P]: P[Proof] = ??? // TODO
+
+  private def parser[_: P]: P[Proof] = P(
+    (id ~ ("=>" | "⇒") ~/ parser).map {
+      case (hypothesis, conclusion) => ImplIntro(hypothesis, conclusion)
+    }
+  | appl
+  ) // TODO use a repetition combinator
 }
