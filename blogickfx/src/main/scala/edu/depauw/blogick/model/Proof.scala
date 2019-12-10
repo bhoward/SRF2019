@@ -174,17 +174,18 @@ object Proof {
     id.map(Use(_))
   | "?".!.map(_ => ToDo)
   | "(" ~/ parser ~ ")"
-  | "<" ~/ (">".!.map(_ => TrueIntro) | (parser ~ "," ~ parser ~ ">").map {
-      case (first, second) => ConjIntro(first, second)
-    })
+  | "<" ~/ (">".!.map(_ => TrueIntro)
+           | (parser ~ "," ~ parser ~ ">").map {
+               case (first, second) => ConjIntro(first, second)
+             }
+           )
   )
 
   private def appl[_: P]: P[Proof] = ??? // TODO
 
   private def parser[_: P]: P[Proof] = P(
-    (id ~ ("=>" | "⇒") ~/ parser).map {
-      case (hypothesis, conclusion) => ImplIntro(hypothesis, conclusion)
+    ((id ~ ("=>" | "⇒")).rep ~/ appl).map {
+      case (hyps, conclusion) => hyps.foldRight(conclusion)(ImplIntro(_, _))
     }
-  | appl
-  ) // TODO use a repetition combinator
+  )
 }
