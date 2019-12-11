@@ -28,7 +28,7 @@ class ProofSpec extends FlatSpec with Matchers {
 
   // a proof with a deliberate mix of => and ⇒:
   val proof = Proof.fromString(
-    "x => y => <[left a ⇒ b ⇒ y, right a ⇒ b => first b y] x, [] y>"
+    "x => y => <[left a ⇒ b ⇒ a y, right a ⇒ b => first b (a y)] x, [] y>"
   )
 
   "A proof string" should "parse correctly" in {
@@ -41,9 +41,12 @@ class ProofSpec extends FlatSpec with Matchers {
             DisjElim(
               Use("x"),
               "a",
-              ImplIntro("b", Use("y")),
+              ImplIntro("b", ImplElim(Use("a"), Use("y"))),
               "a",
-              ImplIntro("b", ImplElim(ConjElimFirst(Use("b")), Use("y")))
+              ImplIntro(
+                "b",
+                ImplElim(ConjElimFirst(Use("b")), ImplElim(Use("a"), Use("y")))
+              )
             ),
             FalseElim(Use("y"))
           )
@@ -54,7 +57,12 @@ class ProofSpec extends FlatSpec with Matchers {
 
   it should "render correctly" in {
     proof.toString should be(
-      "x ⇒ y ⇒ <[left a ⇒ b ⇒ y, right a ⇒ b ⇒ first b y] x, [] y>"
+      "x ⇒ y ⇒ <[left a ⇒ b ⇒ a y, right a ⇒ b ⇒ first b (a y)] x, [] y>"
     )
+  }
+
+  it should "have the correct formula" in {
+    val cp = proof.check.runA(Environment.Empty).value
+    cp.formula.toString should be("(⊥ → _9 ∨ ⊥ → _12) → ⊥ → ((_12 → _9 ∧ _11) → _9 ∧ _13)")
   }
 }
