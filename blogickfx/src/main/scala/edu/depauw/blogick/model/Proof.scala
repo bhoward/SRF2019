@@ -6,6 +6,7 @@ import cats.data.State
 //   allow use in other proofs (props as params);
 //   keep track of completed theorems (no ToDo) and dependencies (no cycles);
 //   allow update of ToDo with replacement proof
+//   figure out the interaction between Proof/CheckedProof and parsing/rendering...
 
 final case class ProofCheckException(msg: String) extends Exception(msg)
 
