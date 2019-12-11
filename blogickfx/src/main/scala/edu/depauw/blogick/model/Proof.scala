@@ -225,7 +225,7 @@ object Proof {
     id ~ ("=>" | "⇒")
   )
 
-  private def parser[_: P]: P[Proof] = P(
+  def parser[_: P]: P[Proof] = P(
     (bind.rep ~/ appl).map {
       case (hyps, conclusion) => hyps.foldRight(conclusion)(ImplIntro(_, _))
     }

@@ -8,27 +8,13 @@ import edu.depauw.blogick.gui.ProofRenderer
 import edu.depauw.blogick.model._
 
 object BlogickFX extends JFXApp {
-  val proof = ImplIntro(
-    "H1",
-    ImplIntro(
-      "H2",
-      ImplElim(
-        Use("H1"),
-        ConjIntro(
-          ConjElimSecond(Use("H2")),
-          ConjElimFirst(Use("H2"))
-          // ToDo
-        )
-      )
-    )
-  )
-
-  val cp = proof.check.runA(Environment.Empty).value
+  // val thm = Theorem.fromString("demo: ((P & Q) -> R) -> (Q & P) -> R = H1 => H2 => H1 <second H2, first H2>")
+  val thm = Theorem.fromString("demo: ((P & Q) -> R) -> (Q & P) -> R = H1 => H2 => H1 <second H2, ?>")
 
   stage = new PrimaryStage {
-    title = s"Block Logic: $proof"
+    title = s"Block Logic: $thm"
     scene = new Scene {
-      content = ProofRenderer(cp)
+      content = ProofRenderer(thm.checkedProof)
     }
   }
 }
