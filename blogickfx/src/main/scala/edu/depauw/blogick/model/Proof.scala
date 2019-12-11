@@ -2,8 +2,7 @@ package edu.depauw.blogick.model
 
 import cats.data.State
 
-// TODO parse from text
-// add top-level Theorem (maybe in CheckedProof?) -- give it a name and a formula (names for props);
+// TODO add top-level Theorem (maybe in CheckedProof?) -- give it a name and a formula (names for props);
 //   allow use in other proofs (props as params);
 //   keep track of completed theorems (no ToDo) and dependencies (no cycles);
 //   allow update of ToDo with replacement proof
@@ -17,14 +16,15 @@ sealed trait Proof {
   override def toString: String = render(0)
 
   def parenIf(level: Int, precedence: Int)(s: String): String =
-  if (precedence >= level) {
-    "(" + s + ")"
-  } else {
-    s
-  }
+    if (precedence >= level) {
+      "(" + s + ")"
+    } else {
+      s
+    }
 }
 
-final case class ImplIntro(hypothesis: String,  conclusion: Proof) extends Proof {
+final case class ImplIntro(hypothesis: String, conclusion: Proof)
+    extends Proof {
   val check: State[Environment, CheckedProof] = for {
     hypForm <- Environment.genVar
     _ <- Environment.extend(hypothesis, hypForm)
@@ -33,7 +33,8 @@ final case class ImplIntro(hypothesis: String,  conclusion: Proof) extends Proof
     binding <- Environment.retract
   } yield CkImplIntro(formula, binding, cc)
 
-  def render(precedence: Int): String = parenIf(1, precedence)(s"$hypothesis ⇒ ${conclusion.render(0)}")
+  def render(precedence: Int): String =
+    parenIf(1, precedence)(s"$hypothesis ⇒ ${conclusion.render(0)}")
 }
 
 final case class ImplElim(impl: Proof, arg: Proof) extends Proof {
@@ -44,7 +45,8 @@ final case class ImplElim(impl: Proof, arg: Proof) extends Proof {
     _ = Implication(ca.formula, formula).unify(ci.formula)
   } yield CkImplElim(formula, ci, ca)
 
-  def render(precedence: Int): String = parenIf(2, precedence)(s"${impl.render(1)} ${arg.render(2)}")
+  def render(precedence: Int): String =
+    parenIf(2, precedence)(s"${impl.render(1)} ${arg.render(2)}")
 }
 
 final case object TrueIntro extends Proof {
@@ -62,7 +64,8 @@ final case class ConjIntro(first: Proof, second: Proof) extends Proof {
     formula = Conjunction(cf.formula, cs.formula)
   } yield CkConjIntro(formula, cf, cs)
 
-  def render(precedence: Int): String = s"<${first.render(0)}, ${second.render(0)}>"
+  def render(precedence: Int): String =
+    s"<${first.render(0)}, ${second.render(0)}>"
 }
 
 final case class ConjElimFirst(conj: Proof) extends Proof {
@@ -73,7 +76,8 @@ final case class ConjElimFirst(conj: Proof) extends Proof {
     _ = Conjunction(formula, dummy).unify(cc.formula)
   } yield CkConjElimFirst(formula, cc)
 
-  def render(precedence: Int): String = parenIf(2, precedence)(s"first ${conj.render(2)}")
+  def render(precedence: Int): String =
+    parenIf(2, precedence)(s"first ${conj.render(2)}")
 }
 
 final case class ConjElimSecond(conj: Proof) extends Proof {
@@ -84,7 +88,8 @@ final case class ConjElimSecond(conj: Proof) extends Proof {
     _ = Conjunction(dummy, formula).unify(cc.formula)
   } yield CkConjElimSecond(formula, cc)
 
-  def render(precedence: Int): String = parenIf(2, precedence)(s"second ${conj.render(2)}")
+  def render(precedence: Int): String =
+    parenIf(2, precedence)(s"second ${conj.render(2)}")
 }
 
 final case class DisjIntroLeft(arg: Proof) extends Proof {
@@ -94,7 +99,8 @@ final case class DisjIntroLeft(arg: Proof) extends Proof {
     formula = Disjunction(ca.formula, other)
   } yield CkDisjIntroLeft(formula, ca)
 
-  def render(precedence: Int): String = parenIf(2, precedence)(s"left ${arg.render(2)}")
+  def render(precedence: Int): String =
+    parenIf(2, precedence)(s"left ${arg.render(2)}")
 }
 
 final case class DisjIntroRight(arg: Proof) extends Proof {
@@ -104,10 +110,17 @@ final case class DisjIntroRight(arg: Proof) extends Proof {
     formula = Disjunction(other, ca.formula)
   } yield CkDisjIntroRight(formula, ca)
 
-  def render(precedence: Int): String = parenIf(2, precedence)(s"right ${arg.render(2)}")
+  def render(precedence: Int): String =
+    parenIf(2, precedence)(s"right ${arg.render(2)}")
 }
 
-final case class DisjElim(disj: Proof, leftName: String, leftCase: Proof, rightName: String, rightCase: Proof) extends Proof {
+final case class DisjElim(
+    disj: Proof,
+    leftName: String,
+    leftCase: Proof,
+    rightName: String,
+    rightCase: Proof
+) extends Proof {
   val check: State[Environment, CheckedProof] = for {
     formula <- Environment.genVar
     leftForm <- Environment.genVar
@@ -124,7 +137,11 @@ final case class DisjElim(disj: Proof, leftName: String, leftCase: Proof, rightN
     _ = formula.unify(cr.formula)
   } yield CkDisjElim(formula, cd, leftBind, cl, rightBind, cr)
 
-  def render(precedence: Int): String = parenIf(2, precedence)(s"[left $leftName ⇒ ${leftCase.render(0)}, right $rightName ⇒ ${rightCase.render(0)}] ${disj.render(2)}")
+  def render(precedence: Int): String =
+    parenIf(2, precedence)(
+      s"[left $leftName ⇒ ${leftCase.render(0)}, right $rightName ⇒ ${rightCase
+        .render(0)}] ${disj.render(2)}"
+    )
 }
 
 final case class FalseElim(falsum: Proof) extends Proof {
@@ -134,13 +151,14 @@ final case class FalseElim(falsum: Proof) extends Proof {
     _ = False.unify(cf.formula)
   } yield CkFalseElim(formula, cf)
 
-  def render(precedence: Int): String = parenIf(2, precedence)(s"[] ${falsum.render(2)}")
+  def render(precedence: Int): String =
+    parenIf(2, precedence)(s"[] ${falsum.render(2)}")
 }
 
 final case class Use(name: String) extends Proof {
   val check: State[Environment, CheckedProof] = State { env =>
     env(name) match {
-      case None => throw ProofCheckException(s"Binding not found: $name")
+      case None          => throw ProofCheckException(s"Binding not found: $name")
       case Some(formula) => (env, CkUse(formula, Binding(name, formula)))
     }
   }
@@ -162,30 +180,61 @@ object Proof {
   import fastparse.SingleLineWhitespace._
   import fastparse.Parsed.Success
   import fastparse.Parsed.Failure
-    
+
   private def idStart(c: Char): Boolean = c.isUnicodeIdentifierStart
-  private def idPart(c: Char): Boolean = c.isUnicodeIdentifierPart || (c == '\'')
+  private def idPart(c: Char): Boolean =
+    c.isUnicodeIdentifierPart || (c == '\'')
 
   private def id[_: P]: P[String] = P(
-    (CharPred(idStart)~~CharsWhile(idPart).?).!
+    (CharPred(idStart) ~~ CharsWhile(idPart).?).!
   )
 
   private def prim[_: P]: P[Proof] = P(
     id.map(Use(_))
-  | "?".!.map(_ => ToDo)
-  | "(" ~/ parser ~ ")"
-  | "<" ~/ (">".!.map(_ => TrueIntro)
-           | (parser ~ "," ~ parser ~ ">").map {
-               case (first, second) => ConjIntro(first, second)
-             }
-           )
+      | "?".!.map(_ => ToDo)
+      | "(" ~/ parser ~ ")"
+      | "<" ~/ (">".!.map(_ => TrueIntro)
+        | (parser ~ "," ~ parser ~ ">").map {
+          case (first, second) => ConjIntro(first, second)
+        })
   )
 
-  private def appl[_: P]: P[Proof] = ??? // TODO
+  private def appl[_: P]: P[Proof] = P(
+    (head ~/ prim.rep).map {
+      case (h, ps) => ps.foldLeft(h)(ImplElim(_, _))
+    }
+  )
+
+  private def head[_: P]: P[Proof] = P(
+    ("first" ~/ prim).map(p => ConjElimFirst(p))
+      | ("second" ~/ prim).map(p => ConjElimSecond(p))
+      | ("left" ~/ prim).map(p => DisjIntroLeft(p))
+      | ("right" ~/ prim).map(p => DisjIntroRight(p))
+      | ("[" ~/ (("]" ~ prim).map(p => FalseElim(p))
+        | ("left" ~ bind ~ parser ~ "," ~ "right" ~ bind ~ parser ~ "]" ~ prim)
+          .map {
+            case (lhyp, left, rhyp, right, arg) =>
+              DisjElim(arg, lhyp, left, rhyp, right)
+          }))
+      | prim
+  )
+
+  private def bind[_: P]: P[String] = P(
+    id ~ ("=>" | "⇒")
+  )
 
   private def parser[_: P]: P[Proof] = P(
-    ((id ~ ("=>" | "⇒")).rep ~/ appl).map {
+    (bind.rep ~/ appl).map {
       case (hyps, conclusion) => hyps.foldRight(conclusion)(ImplIntro(_, _))
     }
   )
+
+  def fromString(s: String): Proof = {
+    def topLevel[_: P]: P[Proof] = P(parser ~ End)
+
+    parse(s, topLevel(_)) match {
+      case Success(value, _) => value
+      case f @ Failure(label, index, extra) => sys.error(f.trace().msg) // TODO improve this
+    }
+  }
 }

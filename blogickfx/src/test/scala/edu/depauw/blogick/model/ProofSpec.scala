@@ -3,12 +3,11 @@ package edu.depauw.blogick.model
 import org.scalatest._
 
 class ProofSpec extends FlatSpec with Matchers {
-
   "A simple proof" should "have the correct formula" in {
     val A = Variable(1)
     val proof = ImplIntro("x", Use("x"))
     val cp = proof.check.runA(Environment.Empty).value
-    cp.formula should be (Implication(A, A))
+    cp.formula should be(Implication(A, A))
   }
 
   "A proof with a hole" should "have the correct formula" in {
@@ -17,13 +16,45 @@ class ProofSpec extends FlatSpec with Matchers {
     val binding = Binding("x", Implication(A, A))
     val proof = ImplIntro("x", ImplElim(Use("x"), ToDo))
     val cp = proof.check.runA(Environment.Empty).value
-    cp.formula should be (Implication(Implication(A, B), B))
+    cp.formula should be(Implication(Implication(A, B), B))
   }
 
   "An invalid proof" should "throw ProofCheckException" in {
     val proof = Use("magic")
-    a [ProofCheckException] should be thrownBy {
+    a[ProofCheckException] should be thrownBy {
       proof.check.runA(Environment.Empty).value
     }
+  }
+
+  // a proof with a deliberate mix of => and ⇒:
+  val proof = Proof.fromString(
+    "x => y => <[left a ⇒ b ⇒ y, right a ⇒ b => first b y] x, [] y>"
+  )
+
+  "A proof string" should "parse correctly" in {
+    proof should be(
+      ImplIntro(
+        "x",
+        ImplIntro(
+          "y",
+          ConjIntro(
+            DisjElim(
+              Use("x"),
+              "a",
+              ImplIntro("b", Use("y")),
+              "a",
+              ImplIntro("b", ImplElim(ConjElimFirst(Use("b")), Use("y")))
+            ),
+            FalseElim(Use("y"))
+          )
+        )
+      )
+    )
+  }
+
+  it should "render correctly" in {
+    proof.toString should be(
+      "x ⇒ y ⇒ <[left a ⇒ b ⇒ y, right a ⇒ b ⇒ first b y] x, [] y>"
+    )
   }
 }
