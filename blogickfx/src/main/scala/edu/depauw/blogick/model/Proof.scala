@@ -5,7 +5,8 @@ import cats.data.State
 // TODO add top-level Theorem (maybe in CheckedProof?) -- give it a name and a formula (names for props);
 //   allow use in other proofs (props as params);
 //   keep track of completed theorems (no ToDo) and dependencies (no cycles);
-//   allow update of ToDo with replacement proof
+//   manage environment(s) (modules?) of named theorems;
+//   allow update of ToDo with replacement proof;
 //   figure out the interaction between Proof/CheckedProof and parsing/rendering...
 
 final case class ProofCheckException(msg: String) extends Exception(msg)
