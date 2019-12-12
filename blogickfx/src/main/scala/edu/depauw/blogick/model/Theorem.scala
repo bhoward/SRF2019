@@ -1,6 +1,6 @@
 package edu.depauw.blogick.model
 
-class Theorem(val name: String, val formula: Formula, proof: Proof) {
+class Theorem(val name: String, val formula: Formula, val proof: Proof) {
   val checkedProof: CheckedProof = proof.check.runA(Environment.Empty).value
 
   val _ = checkedProof.formula.unify(formula)
@@ -23,7 +23,7 @@ object Theorem {
     (CharPred(idStart) ~~ CharsWhile(idPart).?).!
   )
 
-  private def parser[_: P]: P[Theorem] = P(
+  def parser[_: P]: P[Theorem] = P(
     (id ~ ":" ~ Formula.parser ~ "=" ~ Proof.parser).map {
       case (name, formula, proof) => new Theorem(name, formula, proof)
     }
